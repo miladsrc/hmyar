@@ -8,10 +8,11 @@ Last updated: 2026-10-17 (bootstrap)
 
 ## Active work
 
-- Bootstrap of the `hmyar` repository (Stage A discovery + Stage B skeleton + Stage C WBS ingestion + Stage E daily report). In progress on branch `main` (initial commit only).
+- Bootstrap of the `hmyar` repository (Stages A/B/C/E) complete and committed to `main` (squash merge of PR #1, commit b3ab082).
 
 ## Recent commits
 
+- `b3ab082` bootstrap: hmyar repository skeleton, WBS ingestion, memory system, CI (#1)
 - `bdd24d3` Initial commit (README.md only).
 
 ## Blockers
@@ -19,7 +20,7 @@ Last updated: 2026-10-17 (bootstrap)
 - OQ-PHASE: approved active phase not confirmed.
 - OQ-STATUS: task status authority not decided.
 - OQ-STACK: technology stack undecided.
-- OQ-CLASSIFICATION: storage policy for WBS/images not confirmed.
+- OQ-CLASSIFICATION: storage policy for WBS/images not confirmed (normalized export already committed; revert if denied).
 - OQ-VISIBILITY: repo currently public; default is private.
 
 ## Proposed next step
