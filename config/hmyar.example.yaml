@@ -1,0 +1,33 @@
+# hmyar configuration (example). Copy to config/hmyar.yaml (gitignored) and fill in.
+# All secrets must come from environment variables or a secret manager, never from this file.
+
+project:
+  name: Hamtayar
+  repo: miladsrc/hmyar
+  default_branch: main
+  knowledge_root: .
+
+timezone: "Asia/Tehran"   # set explicitly; do not guess
+
+wbs:
+  source_path: ""          # local path to Hamtayar_Backlog_WBS.xlsx (never commit the workbook)
+  normalized_dir: backlog/normalized
+
+daily_report:
+  enabled: true
+  schedule_cron: "0 8 * * *"   # example; only enable after runtime/secrets are configured
+  llm_summarization: false     # deterministic only until a provider is approved and configured
+  output_dir: memory/daily
+
+llm:
+  provider: "none"         # none | ollama | openai-compatible | ... (adapter interface; no hard-coded vendor)
+  base_url: ""
+  model: ""
+  api_key_env: ""          # name of env var holding the key; never the key itself
+
+github:
+  auth: "credential-manager"  # or "pat-env"
+  pat_env_var: "GITHUB_TOKEN"  # only if auth=pat-env
+
+secrets_scan:
+  enabled: true
