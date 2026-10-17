@@ -9,6 +9,7 @@ Last updated: 2026-10-17 (bootstrap)
 ## Active work
 
 - Bootstrap of the `hmyar` repository (Stages A/B/C/E) complete and committed to `main` (squash merge of PR #1, commit b3ab082).
+- Daily collaboration routine set up: scheduled report workflow, team roster (placeholders), ADR-001 (proposed). Branch `knowledge/daily-collaboration`.
 
 ## Recent commits
 

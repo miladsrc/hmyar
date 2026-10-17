@@ -42,6 +42,46 @@ def main():
     status = git("status", "--short")
     branch = git("rev-parse", "--abbrev-ref", "HEAD")
 
+    # Commits by author (window)
+    authors_raw = git("log", "--since", f"{args.date} 00:00", "--until", f"{args.date} 23:59:59",
+                      "--pretty=format:%an")
+    author_counts = {}
+    for a in authors_raw.splitlines():
+        a = a.strip()
+        if a:
+            author_counts[a] = author_counts.get(a, 0) + 1
+    authors_lines = "\n".join(f"- {name}: {n} commit(s)" for name, n in sorted(author_counts.items())) or "(none)"
+
+    # Recently updated branches (last 7 days) - best-effort, may be empty in shallow clones
+    branches_raw = git("for-each-ref", "--sort=-committerdate",
+                       "--format=%(refname:short)|%(committerdate:short)|%(authorname)",
+                       "refs/heads", "refs/remotes")
+    branch_lines = []
+    cutoff = datetime.date.fromisoformat(args.date)
+    try:
+        cutoff = cutoff - datetime.timedelta(days=7)
+    except Exception:
+        pass
+    for line in branches_raw.splitlines():
+        parts = line.split("|")
+        if len(parts) < 3:
+            continue
+        name, cdate, author = parts[0], parts[1], parts[2]
+        try:
+            cd = datetime.date.fromisoformat(cdate)
+        except ValueError:
+            continue
+        if cd >= cutoff:
+            branch_lines.append(f"- {name} (updated {cdate}, last by {author})")
+    branches_block = "\n".join(branch_lines) if branch_lines else "(none observed)"
+
+    # Short stat for the window
+    shortstat = git("log", "--since", f"{args.date} 00:00", "--until", f"{args.date} 23:59:59",
+                    "--shortstat", "--oneline")
+    # condense: keep only stat lines
+    stat_lines = [l for l in shortstat.splitlines() if "changed" in l or "insertion" in l or "deletion" in l]
+    stat_block = "\n".join(stat_lines) if stat_lines else "(none)"
+
     lines = []
     lines.append(f"# Daily Report - {args.date}")
     lines.append("")
@@ -56,6 +96,18 @@ def main():
     lines.append("")
     lines.append(commits if commits else "(none)")
     lines.append("")
+    lines.append("## Commits by author")
+    lines.append("")
+    lines.append(authors_lines)
+    lines.append("")
+    lines.append("## Change volume (shortstat)")
+    lines.append("")
+    lines.append(stat_block)
+    lines.append("")
+    lines.append("## Branches updated in last 7 days")
+    lines.append("")
+    lines.append(branches_block)
+    lines.append("")
     lines.append("## Working tree status")
     lines.append("")
     lines.append("```")
@@ -65,6 +117,10 @@ def main():
     lines.append("## Knowledge changes")
     lines.append("")
     lines.append("(Record manually or via PR review: what changed, evidence, decisions, blockers, next steps.)")
+    lines.append("")
+    lines.append("## Team / task status")
+    lines.append("")
+    lines.append("Task status authority not yet decided (OQ-STATUS). Until decided, treat git activity above as observed evidence and label unverified items as requiring confirmation.")
     lines.append("")
     lines.append("## LLM summarization")
     lines.append("")

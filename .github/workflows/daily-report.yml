@@ -1,0 +1,59 @@
+name: Daily memory update
+
+# Deterministic daily report (no LLM). Generates memory/daily/YYYY-MM-DD.md and opens a PR.
+# Schedule: 14:31 Asia/Tehran. Iran uses a fixed UTC+03:30 offset (no DST since 2022),
+# so 14:31 Tehran = 11:01 UTC.
+on:
+  schedule:
+    - cron: "1 11 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: Compute Tehran date
+        id: date
+        run: |
+          echo "date=$(python -c 'from datetime import datetime,timezone,timedelta; print((datetime.now(timezone(timedelta(hours=3,minutes=30)))).date().isoformat())')" >> "$GITHUB_OUTPUT"
+      - name: Generate report
+        run: python scripts/daily_report.py --date "${{ steps.date.outputs.date }}"
+      - name: Validate memory
+        run: |
+          python scripts/validate_memory.py
+          python scripts/check_links.py
+          python scripts/check_secrets.py
+      - name: Run tests
+        run: python -m pytest -q
+      - name: Open PR if changes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "hmyar-bot"
+          git config user.email "hmyar-bot@users.noreply.github.com"
+          BRANCH="daily/${{ steps.date.outputs.date }}"
+          git checkout -B "$BRANCH"
+          git add "memory/daily/${{ steps.date.outputs.date }}.md"
+          git commit -m "daily: memory update ${{ steps.date.outputs.date }}"
+          git push origin "$BRANCH"
+          gh pr create \
+            --title "Daily memory update ${{ steps.date.outputs.date }}" \
+            --body "Automated deterministic daily report. See \`memory/daily/${{ steps.date.outputs.date }}.md\`. Requires review; not auto-merged." \
+            --base main --head "$BRANCH"
