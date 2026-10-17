@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.env.*
+*.log
+
+# Secrets
+*.pem
+*.key
+*.p12
+secrets/
+credentials/
+
+# OS / IDE
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Data dumps (do not commit proprietary source material)
+*.xlsx
+*.xls
+*.csv.bak
+
+# Build
+dist/
+build/
+node_modules/
+target/
