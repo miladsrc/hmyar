@@ -42,14 +42,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if git diff --quiet; then
+          if [ -z "$(git status --porcelain)" ]; then
             echo "No changes to commit."
             exit 0
           fi
           git config user.name "hmyar-bot"
           git config user.email "hmyar-bot@users.noreply.github.com"
           BRANCH="daily/${{ steps.date.outputs.date }}"
-          git checkout -b "$BRANCH"
+          git checkout -B "$BRANCH"
           git add "memory/daily/${{ steps.date.outputs.date }}.md"
           git commit -m "daily: memory update ${{ steps.date.outputs.date }}"
           git push origin "$BRANCH"
